@@ -1,0 +1,46 @@
+how to send notification on email 
+-------------------------------------------------------------------------------------------------------------------------
+1 make a notification
+    =>php artisan make:notification Login notification
+
+    =>in file og LoginNotification
+        =>class LoginNotification extends Notification
+{
+    use Queueable;
+    public $message;
+    public $fromemail;
+    public $subject;
+    public $mailer;
+
+
+    public function __construct()
+    {
+        $this->message = "you must login";
+        $this->subject ="This is a new login";
+        $this->fromemail ="test@gmail.com";
+        $this->mailer ="smtp";
+
+    }
+
+
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', url('/'))
+                    ->line('Thank you for using our application!')
+                    ->mailer('smtp')
+                    ->subject($this->subject)
+                    ->greeting('hello'.$notifiable->first_name)
+                    ->line($this->message);
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------
+in LoginController
+=> $user->notify(new LoginNotification());
+

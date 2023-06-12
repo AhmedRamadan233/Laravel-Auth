@@ -1,0 +1,79 @@
+-------------------------------------------------------------------------------------------------------------------------
+1 edit migration to user 
+    => first name & last name & gender & image & phono & date & role & status && so one 
+    => to generate access token in larave use (sanctum)
+        => composer require sanctum
+        => publsh 
+        => migration
+-------------------------------------------------------------------------------------------------------------------------
+        => in kernal.php
+            =>'api' =>[
+                laravel\sanctum
+                illumenate
+            ]
+-------------------------------------------------------------------------------------------------------------------------
+        => in appServicesrsPoviders
+            =>in boot 
+                =>sanctum::usePersonalAccessTokenModel(personalAccessToken::class)
+-------------------------------------------------------------------------------------------------------------------------
+        =>if dont added HasApiTokens or Notifiable in (user model){
+            added it 
+        }  
+-------------------------------------------------------------------------------------------------------------------------
+2 make a Auth\RegistrationController && loginController && make a registraton request and login request to validate
+    => in requestvalidation 
+        => make it true and validations 
+        
+    => in registercontroller
+        => use (Hash && model && request )
+
+        =>public function register(registerRequest $request){
+            $newuser = userModel->validate();
+
+            $newuser[password] = Hash::make($newuser[password]);
+            $newuser['role']='user';
+            $newuser['status']= 'active';
+
+            //after that make a create
+
+            $user = UserModel::create($newuser);
+
+            //generate token
+            $token = $user->createToken('user', ['app:all']);
+           
+            // token successfully created and return it
+            $success['token'] = $token->plainTextToken;
+            
+            //return name
+            $success['name'] = $user->first_name;
+            
+            // successfully
+            $success['success'] = true;
+
+            
+        }
+-------------------------------------------------------------------------------------------------------------------------
+
+    public function login(LoginRequest $request)
+    {
+        $credentials = [
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ];
+
+        if (auth()->attempt($credentials)) {
+            $user = Auth::user();
+            
+            $user->tokens()->delete();
+            $token = $user->createToken(request()->userAgent());
+            $success['token'] = $token->plainTextToken;
+            $success['name'] = $user->first_name;
+            $success['success'] = true;
+            // $user->notify(new LoginNotification());
+
+            return response()->json($success, 200);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+    
