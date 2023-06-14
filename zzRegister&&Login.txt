@@ -53,7 +53,6 @@
             
         }
 -------------------------------------------------------------------------------------------------------------------------
-
     public function login(LoginRequest $request)
     {
         $credentials = [
@@ -76,4 +75,7 @@
             return response()->json(['error' => 'Unauthorized'], 401);
         }
     }
-    
+-------------------------------------------------------------------------------------------------------------------------
+4 make a route
+    => Route::post('register', [RegisterController::class, 'register']);
+    => Route::post('login', [LoginController::class, 'login']);
