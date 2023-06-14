@@ -26,7 +26,7 @@ trait ImageProcessiong{
         $extensions = $this->get_mime($img->mime());
         $str_random = str::random(8);
         $imagePath = $str_random.time().$extensions;
-        $img->save(storage_path('app/imagesfb').'/'.$imagePath);
+        $img->save(storage_path('app/imagesfp').'/'.$imagePath);
         return $imagePath;
     }
     // to make size
@@ -39,7 +39,7 @@ trait ImageProcessiong{
             $constrain->aspectRatio();
         });
         $imagePath = $str_random.time().$extensions;
-        $img->save(storage_path('app/imagesfb').'/'.$imagePath);
+        $img->save(storage_path('app/imagesfp').'/'.$imagePath);
         return $imagePath;
     }
     //to make height
@@ -59,7 +59,7 @@ trait ImageProcessiong{
             $img->crop($width , $height , 0 , 0);
         }
         $imagePath = $str_random.time().$extensions;
-        $img->save(storage_path('app/imagesfb').'/'.$imagePath);
+        $img->save(storage_path('app/imagesfp').'/'.$imagePath);
         return $imagePath;
     }
     public function saveImageAndThumbnail($Thefile , $thimb=false){

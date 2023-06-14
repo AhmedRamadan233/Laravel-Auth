@@ -46,8 +46,8 @@ return [
 
         'imagesfp' => [
             'driver' => 'local',
-            'root' => storage_path('app/imagesfb'),
-            'url' => env('APP_URL').'/imagesfb',
+            'root' => storage_path('app/imagesfp'),
+            'url' => env('APP_URL').'/imagesfp',
             'visibility' => 'public',
         ],
 
@@ -79,7 +79,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
-        public_path('imagesfb') => storage_path('app/imagesfb'),
+        public_path('imagesfp') => storage_path('app/imagesfp'),
     ],
 
 ];
