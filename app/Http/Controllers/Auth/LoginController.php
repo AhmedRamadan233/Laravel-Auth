@@ -31,7 +31,7 @@ class LoginController extends Controller
 
             return response()->json($success, 200);
         } else {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => __( 'auth.Unauthorised')], 401);
         }
     }
 }

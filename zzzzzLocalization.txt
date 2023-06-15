@@ -1,0 +1,30 @@
+to make a localization
+-------------------------------------------------------------------------------------------------------------------------
+1=> in folder of lang make a folder has name are
+-------------------------------------------------------------------------------------------------------------------------
+2=> in config 
+    => app.php 
+        => 'available_locales' =>[
+                'en', 
+                'ar'
+            ],  
+-------------------------------------------------------------------------------------------------------------------------
+3=> make a middleware
+    => php artisan make:middleware setlang
+        =>  public function handle(Request $request, Closure $next): Response
+            {
+                if (! in_array($request->segment(2), config('app.available_locales'))) {
+                    abort(400);
+                }
+                App::setLocale($request->segment(2));
+                return $next($request);
+            }
+        => and put it in kernal to use it 
+            => protected $middlewareAliases = [
+                =>'setapplang' => \App\Http\Middleware\SetAppLang::class,
+            ]
+-------------------------------------------------------------------------------------------------------------------------
+4=> make a routes 
+        =>  Route::middleware('setapplang')->prefix('{locale}')->group(function(){
+                put in it any routes i want to make it arabic
+            })         

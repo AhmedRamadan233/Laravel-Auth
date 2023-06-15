@@ -3,7 +3,7 @@ how to send notification on email
 1 make a notification
     =>php artisan make:notification Login notification
 
-    =>in file og LoginNotification
+    =>in file of LoginNotification
         =>class LoginNotification extends Notification
 {
     use Queueable;

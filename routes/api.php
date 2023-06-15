@@ -22,18 +22,17 @@ use App\Http\Controllers\Auth\ProfileUpdateController;
 */
 
 
+Route::middleware('setapplang')->prefix('{locale}')->group(function(){
+    Route::post('register', [RegisterController::class, 'register']);
+    Route::post('login', [LoginController::class, 'login']);
+    
+    Route::post('password/forget-password', [ForgetPasswordController::class, 'forgetPassword']);
+    Route::post('password/reset-password', [ResetPasswordController::class, 'passwordReset']);
+});
 
 
-Route::post('register', [RegisterController::class, 'register']);
-Route::post('login', [LoginController::class, 'login']);
 
-
-
-Route::post('password/forget-password', [ForgetPasswordController::class, 'forgetPassword']);
-Route::post('password/reset-password', [ResetPasswordController::class, 'passwordReset']);
-
-
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum' , 'setapplang'])->prefix('{locale}')->group(function () {
     Route::get('profile', function (Request $request) {
         return $request->user();
     });
