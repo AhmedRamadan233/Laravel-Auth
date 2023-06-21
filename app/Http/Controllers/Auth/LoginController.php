@@ -10,6 +10,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\LoginNotification;
+use PhpParser\Node\Stmt\TryCatch;
+
 class LoginController extends Controller
 {
     public function login(LoginRequest $request)
@@ -27,7 +29,10 @@ class LoginController extends Controller
             $success['token'] = $token->plainTextToken;
             $success['name'] = $user->first_name;
             $success['success'] = true;
-            $user->notify(new LoginNotification());
+            Try{
+                $user->notify(new LoginNotification());
+
+            }catch(\Exception $e){}
 
             return response()->json($success, 200);
         } else {

@@ -10,6 +10,9 @@ use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ProfileUpdateController;
 
+use App\Http\Controllers\Admin\RolesAndPermissionController;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -40,5 +43,11 @@ Route::middleware(['auth:sanctum' , 'setapplang'])->prefix('{locale}')->group(fu
 
     Route::post('email-verification', [EmailVerificationNotificationController::class, 'email_verification']);
     Route::get('email-verification', [EmailVerificationNotificationController::class, 'sendEmailVerification']);
+
+});
+
+Route::middleware(['auth:sanctum', 'setapplang'])->prefix('{locale}/admin')->group(function () {
+    Route::resource('role-permissions', RolesAndPermissionController::class);
+    Route::get('role-permissions/edit/{id}', [RolesAndPermissionController::class, 'edit'])->name('role-permissions.edit');
 
 });

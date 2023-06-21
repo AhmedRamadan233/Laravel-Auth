@@ -1,0 +1,162 @@
+laravel permissions
+-------------------------------------------------------------------------------------------------------------------------
+1 install and setup laravel permissions 
+    =>composer require spatie/laravel-permission
+    =>  'providers' => [
+            // ...
+            Spatie\Permission\PermissionServiceProvider::class,
+        ];
+
+    =>php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+    =>php artisan optimize:clear
+    =>php artisan migrate
+-------------------------------------------------------------------------------------------------------------------------
+2 make a seeder RolesAndPermissionSeeder
+    => php artisan make:seeder RolesAndPermissionSeeder
+    => php artisan make:seeder UserSeeder
+
+    in RolesAndPermissionSeeder
+        => use Spatie\Permission\Models\Role;
+        => use Spatie\Permission\Models\Permission;
+        => public function run(): void
+            {
+                $permissions = [
+                    'message create',
+                    'message edit',
+                    'message delete',
+                    'message view',
+                ];
+
+                // Create permissions
+                foreach ($permissions as $permissionName) {
+                    Permission::create(['name' => $permissionName, 'guard_name' => 'web']);
+                }
+
+                // Create role and assign permissions
+                $role = Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+                $permissions = Permission::whereIn('name', $permissions)->get();
+                $role->syncPermissions($permissions);
+            }
+------------------------------------------------------------------------------------------------------------------------  
+3 in The User model requires this trait
+    =>use HasRoles;
+-------------------------------------------------------------------------------------------------------------------------
+4 in The User seeder requires this trait
+    =>use Hash
+    =>public function run(): void
+    {
+        // Admin::factory()->count(10)->create();
+        $user = User::create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'email' => 'admin@admin.com',
+            'gender' => 'gender',
+            'role' => 'suber admin',
+            'birth_date' => '1990-05-26',
+            'status' => 'active',
+            'password' => Hash::make('admin123'),
+
+        ]);
+        // Assigning Direct Permissions To A User
+        // Additionally, individual permissions can be assigned to the user too. For instance:
+        $user->assignRole('suber admin');
+    }
+-------------------------------------------------------------------------------------------------------------------------
+5 make controller RolesAndPermissionController
+    =>  php artisan make:controller Admin\RolesAndPermissionController
+    =>  php artisan make:request Admin\RolesAndPermissionRequest
+   
+    => in RolesAndPermissionRequest 
+    {{ 
+        => in autherizes dont make it true 
+            //if user can make any permission as edit 
+            => if ($this->user()->can('message edit')){
+                return true;
+            }
+    }}
+        => add new function
+            =>  protected function failedAuthorization(){
+                    throw new \Illuminate\Auth\Access\AuthorizationException(__('auth.admin only Unauthorised'));
+                }
+        =>in rules 
+            =>make a validations 
+                =>  return [
+                        'permissions' => ['required'],
+                        'permissions.*' => ['exists:permissions,name'],
+                        'role'=> ['required' , 'unique:roles,name','max:60'],
+                    ];
+-------------------------------------------------------------------------------------------------------------------------
+6 in RolesAndPermissionController add new role with permission
+    => use spatie\Permission\Models\Role;
+    => use Spatie\Permission\Models\Permission;
+    => use App\Http\Requests\Admin\RolesAndPermissionRequest;
+
+    =>make a function store
+        =>  public function store(RolesAndPermissionRequest $request)
+            {
+                $data = $request->validate();
+                $role = Role::create(['name'=>$request->role , 'guard_name'=>'web'])->givePermissionsTo($request->permissions);
+                app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+                return response()->json(['success'=>true , 'data'=>$role],200);
+            }
+-------------------------------------------------------------------------------------------------------------------------
+7 make a route 
+    =>  Route::middleware(['auth:sanctum', 'setapplang'])->prefix('{locale}/admin')->group(function () {
+            Route::resource('role-permissions', RolesAndPermissionController::class);
+        });
+-------------------------------------------------------------------------------------------------------------------------
+8 in RolesAndPermissionController delete role 
+    => public function destroly ($lang ,$id){
+        try {
+            $role = Role::findOrFail($id);
+            $role->syncPermissions([]);
+            $role->delete();
+    
+            return response()->json(['success' => true, 'data' => 'Deleted role with name: '.$role->name], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
+            return response()->json(['success' => false, 'data' => 'Role not found with ID: '.$id], 404);
+        }
+    }
+-------------------------------------------------------------------------------------------------------------------------
+9 make a trait to authCheck
+    =>  <?php
+        namespace App\Traits;
+        use Auth;
+        trait AuthorizeCheacked
+        {
+            public function authorizeCheacked($permission){
+                if (!Auth::user()->can($permission)){
+                    throw new \Illuminate\Auth\Access\AuthorizationException(__('auth.admin only Unauthorised'));
+                }
+            }
+        }
+    => use it in RolesAndPermissionController
+        => App\Traits\AuthorizeCheacked
+
+
+
+
+        public function update($lang, $id, RolesAndPermissionUpdateRequest $request)
+    {
+        $this->authorizeCheacked('message edit');
+        
+        $role = Role::findOrFail($id);
+        
+        // Check if the requested role name is different from the existing role name
+        if ($role->name !== $request->role) {
+            // Check if a role with the requested name already exists
+            $existingRole = Role::where('name', $request->role)->first();
+            if ($existingRole) {
+                return response()->json(['success' => false, 'error' => 'The role name is already taken.'], 422);
+            }
+            
+            // Update the role's name
+            $role->name = $request->role;
+            $role->save();
+        }
+        
+        $permissions = Permission::whereIn('name', $request->permissions)->get();
+        $role->syncPermissions($permissions);
+        
+        return response()->json(['success' => true, 'data' => $role], 200);
+    }

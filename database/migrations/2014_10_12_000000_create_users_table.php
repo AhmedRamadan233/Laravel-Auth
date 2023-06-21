@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->string('image')->nullable();
             $table->date('birth-date')->nullable();
+            $table->date('birth_date')->nullable(); // corrected column name
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

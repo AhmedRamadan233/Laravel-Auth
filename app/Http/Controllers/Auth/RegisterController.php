@@ -28,7 +28,10 @@ class RegisterController extends Controller
         $success['email'] = $user->email;
 
         $success['success'] = true;
-        $user->notify(new EmailVerificationNotification());
+        Try{
+            $user->notify(new EmailVerificationNotification());
+
+        }catch(\Exception $e){}
         return response()->json($success, 200);
     }
 }

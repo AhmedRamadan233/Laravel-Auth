@@ -16,5 +16,7 @@ return [
     'failed' => 'These credentials do not match our records.',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-    'Unauthorised' => 'The current user does not have access to this website + Unauthorised.'
+    'Unauthorised' => 'The current user does not have access to this website + Unauthorised.',
+    'admin only Unauthorised' => 'The current user does not have access to this permissions.',
+
 ];
